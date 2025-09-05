@@ -7,7 +7,7 @@ class DiProvider extends InheritedWidget {
   final GetIt getIt;
 
   static DiProvider of(BuildContext context) {
-    final result = context.dependOnInheritedWidgetOfExactType<DiProvider>();
+    final result = context.getInheritedWidgetOfExactType<DiProvider>();
 
     return result ?? (throw Exception('No DiProvider found in context'));
   }
