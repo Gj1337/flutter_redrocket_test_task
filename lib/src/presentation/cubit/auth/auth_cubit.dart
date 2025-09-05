@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_redrocket_test_task/src/domain/entity/auth_status.dart';
 import 'package:flutter_redrocket_test_task/src/domain/entity/exception/auth_exception.dart';
 import 'package:flutter_redrocket_test_task/src/domain/repository/auth_repository.dart';
-import 'package:flutter_redrocket_test_task/src/presentation/cubit/auth_state.dart';
+import 'package:flutter_redrocket_test_task/src/presentation/cubit/auth/auth_state.dart';
 import 'package:flutter_redrocket_test_task/src/presentation/utils/login_mixin.dart';
 import 'package:injectable/injectable.dart';
 
@@ -12,15 +12,17 @@ class AuthCubit extends Cubit<AuthState> with LoggerMixin {
 
   AuthCubit(this._authRepository) : super(const AuthState.initial());
 
+  @PostConstruct(preResolve: true)
   Future<void> onCreate() async {
     logger.i('onCreate');
 
     try {
       final authStatus = await _authRepository.getAuthStatus();
+      final user = await _authRepository.getUser();
 
       switch (authStatus) {
-        case AuthStatus.authroized:
-          emit(const AuthState.authenticated());
+        case AuthStatus.authroized when user != null:
+          emit(AuthState.authenticated(user: user));
         default:
           emit(const AuthState.unauthenticated());
       }
@@ -29,14 +31,20 @@ class AuthCubit extends Cubit<AuthState> with LoggerMixin {
     }
   }
 
-  Future<void> logIn({required String email, required String password}) async {
+  Future<void> onlogIn({
+    required String email,
+    required String password,
+  }) async {
     logger.i('logIn email=$email password=$password');
 
     try {
       emit(const AuthState.loading());
-      await _authRepository.logIn(email: email, password: password);
+      final user = await _authRepository.logIn(
+        email: email,
+        password: password,
+      );
 
-      emit(const AuthState.authenticated());
+      emit(AuthState.authenticated(user: user));
     } on AccountNotFoundException {
       logger.i('while onCreate caught unexpected AccountNotFoundException');
 
@@ -60,7 +68,7 @@ class AuthCubit extends Cubit<AuthState> with LoggerMixin {
     }
   }
 
-  Future<void> logOut() async {
+  Future<void> onlogOut() async {
     logger.i('logOut');
 
     try {

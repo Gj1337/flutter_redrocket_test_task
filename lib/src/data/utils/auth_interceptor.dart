@@ -4,7 +4,7 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class AuthInterceptor extends Interceptor {
-  final AuthTokenHandler _authTokenManager;
+  final AuthHandler _authTokenManager;
 
   AuthInterceptor(this._authTokenManager);
 

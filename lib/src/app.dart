@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_redrocket_test_task/src/presentation/cubit/auth_cubit.dart';
-import 'package:flutter_redrocket_test_task/src/presentation/cubit/auth_state.dart';
+import 'package:flutter_redrocket_test_task/src/presentation/cubit/auth/auth_cubit.dart';
+import 'package:flutter_redrocket_test_task/src/presentation/cubit/auth/auth_state.dart';
 import 'package:flutter_redrocket_test_task/src/presentation/features/login_screen/login_screen.dart';
 import 'package:flutter_redrocket_test_task/src/presentation/features/main_screen/main_screen.dart';
 import 'package:flutter_redrocket_test_task/src/presentation/utils/di_provider.dart';
@@ -22,7 +22,7 @@ class App extends StatelessWidget {
       getIt: getIt,
       child: BlocProvider(
         lazy: false,
-        create: (_) => getIt.get<AuthCubit>()..onCreate(),
+        create: (_) => getIt.get<AuthCubit>(),
         child: Builder(
           builder: (context) {
             return MaterialApp.router(

@@ -18,7 +18,7 @@ abstract class AuthDatasource {
 @module
 abstract class AuthDatasourceModule {
   @LazySingleton(env: ['dev'])
-  AuthDatasource authDatasource(@Named('AUTH_ENDPOINT') String apiEndpoint) {
+  AuthDatasource authDatasource(@Named('API_ENDPOINT') String apiEndpoint) {
     final dio = Dio(BaseOptions(headers: {"Content-Type": "application/json"}));
 
     return _AuthDatasource(dio, baseUrl: apiEndpoint);

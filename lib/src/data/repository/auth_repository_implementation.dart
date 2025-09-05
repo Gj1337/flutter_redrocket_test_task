@@ -4,24 +4,30 @@ import 'package:flutter_redrocket_test_task/src/data/handlers/auth_token_handler
 import 'package:flutter_redrocket_test_task/src/data/entity/login_request.dart';
 import 'package:flutter_redrocket_test_task/src/domain/entity/auth_status.dart';
 import 'package:flutter_redrocket_test_task/src/domain/entity/exception/auth_exception.dart';
+import 'package:flutter_redrocket_test_task/src/domain/entity/user.dart';
 import 'package:flutter_redrocket_test_task/src/domain/repository/auth_repository.dart';
 import 'package:injectable/injectable.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImplementation implements AuthRepository {
   final AuthDatasource _authDatasource;
-  final AuthTokenHandler _authTokenHandler;
+  final AuthHandler _authHandler;
 
-  AuthRepositoryImplementation(this._authDatasource, this._authTokenHandler);
+  AuthRepositoryImplementation(this._authDatasource, this._authHandler);
 
   @override
-  Future<void> logIn({required String email, required String password}) async {
+  Future<User> logIn({required String email, required String password}) async {
+    late User user;
+
     try {
       final loginResponse = await _authDatasource.login(
         LoginRequest(email: email, password: password),
       );
 
-      _authTokenHandler.updateToken(loginResponse.token);
+      _authHandler.updateToken(loginResponse.token);
+      _authHandler.updateUser(loginResponse.user);
+
+      user = loginResponse.user;
     } on DioException catch (exception) {
       final response = exception.response;
 
@@ -38,22 +44,24 @@ class AuthRepositoryImplementation implements AuthRepository {
         }
       }
     }
+
+    return user;
   }
 
   @override
   Future<void> logOut() async {
-    _authTokenHandler.removeToken();
+    _authHandler.removeToken();
     await _authDatasource.logout();
   }
 
   @override
   Stream<AuthStatus> authStatusStream() {
-    return _authTokenHandler.tokenStream.map(_tokenToAuthStatus);
+    return _authHandler.tokenStream.map(_tokenToAuthStatus);
   }
 
   @override
   Future<AuthStatus> getAuthStatus() async {
-    final token = await _authTokenHandler.getToken();
+    final token = await _authHandler.getToken();
 
     return _tokenToAuthStatus(token);
   }
@@ -63,5 +71,10 @@ class AuthRepositoryImplementation implements AuthRepository {
       null => AuthStatus.unauthroized,
       _ => AuthStatus.authroized,
     };
+  }
+
+  @override
+  Future<User?> getUser() {
+    return _authHandler.getUser();
   }
 }

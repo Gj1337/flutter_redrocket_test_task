@@ -3,6 +3,7 @@ import 'package:flutter_redrocket_test_task/src/data/datasource/auth_datasource.
 import 'package:flutter_redrocket_test_task/src/data/datasource/mock_user_module.dart';
 import 'package:flutter_redrocket_test_task/src/data/entity/login_request.dart';
 import 'package:flutter_redrocket_test_task/src/data/entity/login_response.dart';
+import 'package:flutter_redrocket_test_task/src/domain/entity/user.dart';
 import 'package:injectable/injectable.dart';
 
 @LazySingleton(env: ['test'], as: AuthDatasource)
@@ -12,9 +13,8 @@ class MockAuthDatasource implements AuthDatasource {
   MockAuthDatasource(this._mockAccounts);
 
   String _generateToken(MockAccount account) {
-    final emailPrefix = account.email.split('@')[0];
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    return 'mock_token_${emailPrefix}_$timestamp';
+    return 'mock_token_${account.email}_$timestamp';
   }
 
   @override
@@ -65,7 +65,10 @@ class MockAuthDatasource implements AuthDatasource {
       );
     }
 
-    return LoginResponse(token: _generateToken(foundAccount));
+    return LoginResponse(
+      user: User(name: foundAccount.name),
+      token: _generateToken(foundAccount),
+    );
   }
 
   @override

@@ -38,10 +38,10 @@ GoRouter _buildRouter(BuildContext context) {
 
       final authState = context.read<AuthCubit>().state;
 
-      return switch (authState) {
-        Unauthenticated() => Routes.loginScreen.path,
-        _ => null,
-      };
+      return authState.maybeWhen(
+        unauthenticated: () => Routes.loginScreen.path,
+        orElse: () => null,
+      );
     },
   );
 }
